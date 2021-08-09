@@ -4,6 +4,8 @@ import { ApiService } from '../../servicios/api/api.service';
 import { LoginI } from '../../modelos/Login.interface';
 import { Router } from '@angular/router';
 import { ResponseI } from 'src/app/modelos/responsive.interface';
+import  Swal  from 'sweetalert2';
+
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
@@ -15,11 +17,21 @@ export class LoginComponent implements OnInit {
    usuario: new FormControl('',Validators.required),
    password: new FormControl('',Validators.required)
   })
-  constructor(private api:ApiService,private router:Router) {
+  constructor(private api:ApiService,private router:Router) {}
+  errorStatus:boolean  = false; 
+  errorMsj: any= " ";
+  
 
-   }
+  ngOnInit(): void { 
+    this.revisarToken();
+    
+  }
+  revisarToken(){
+    if(localStorage.getItem('token')){
+      this.router.navigate(['dashboard']);
+    }
+   
 
-  ngOnInit(): void {
   }
 
   onLogin(form: LoginI){
@@ -28,6 +40,15 @@ export class LoginComponent implements OnInit {
       if(dataResponse.status == "ok"){
         localStorage.setItem("token",dataResponse.result.token);
         this.router.navigate(['dashboard']);
+      }
+      else{
+          this.errorStatus = true;
+          this.errorMsj = dataResponse.result.error_msg;
+          Swal.fire({
+            icon: 'error',
+            title: this.errorMsj
+          })
+          
       }
     })
   }
